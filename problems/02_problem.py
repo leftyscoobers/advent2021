@@ -19,7 +19,7 @@ def go_sub(directions, start=[0, 0]):
         position = new_position
     return position
 
-part_1 = go_sub(data)
+part_1 = go_sub(data)w
 
 print(f"Part 1: Product of final position coords is {part_1[0] * part_1[1]}")
 
