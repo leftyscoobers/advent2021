@@ -30,5 +30,5 @@ def spawn_fish(intial_counts, n_days):
 print(f"Total fish after eighty days: {sum(spawn_fish(initial_counts, 80))}")
 
 
-# Part 1: Spawn for 256 days and report total lanternfish
-print(f"Total fish after eighty days: {sum(spawn_fish(initial_counts, 256))}")
+# Part 2: Spawn for 256 days and report total lanternfish
+print(f"Total fish after 256 days: {sum(spawn_fish(initial_counts, 256))}")
