@@ -7,9 +7,12 @@ You have noted the patters (left side of | in input) and you have the read-out o
 Descramble!
 """
 
+from copy import deepcopy
+from itertools import permutations
+
+
 # Parse input
-raw_strings = [l.split('|') for l in open('08_test.txt', 'r').readlines()]
-# raw_strings = [l.split('|') for l in open('08_input.txt', 'r').readlines()]
+raw_strings = [l.split('|') for l in open('08_input.txt', 'r').readlines()]
 
 observed_patterns = [p[0].strip().split() for p in raw_strings]
 observed_display = [p[1].strip().split() for p in raw_strings]
@@ -32,38 +35,63 @@ easy_values = [display_count_of_1478(four_dig) for four_dig in observed_display]
 print(f"Part 1: There are *** {sum(easy_values)} *** 1s, 4s, 7s, or 8s in the input.")
 
 # Part 2: Decode everything, obviously.
-# Let's start over.
-
-def in_string_a_but_not_b(string_a, string_b):
-    set_a = set(list(string_a))
-    set_b = set(list(string_b))
-    return list(set_a - set_b)
+# This is a mess and not all that efficient but it works.
 
 
-# Segment map is: top (0), middle (1), bottom (2), top left (3), bottom left (4), top right (5), bottom right (6)
-# Now map digits to segments:
-digits_to_segments = {0: (0, 2, 3, 4, 5, 6),
-                      1: (5, 6),
-                      2: (0, 5, 1, 4, 2),
-                      3: (0, 5, 1, 6, 2),
-                      4: (3, 1, 5, 6),
-                      5: (0, 3, 1, 6, 2),
-                      6: (0, 3, 4, 2, 6, 1),
-                      7: (0, 5, 6),
-                      8: (0, 1, 2, 3, 4, 5, 6),
-                      9: (2, 6, 5, 0, 3, 1)}
+def string1_substringof_string2(string_1, string_2):
+    # Need this because the order of the digit doesn't matter.
+    s1 = set(list(string_1))
+    s2 = set(list(string_2))
+    return s1.issubset(s2)
 
-test_line = observed_patterns[0]
-decode_line = {}
-for obs in test_line:
-    if len(obs) == 2:
-        decode_line[1] = obs
-    elif len(obs) == 3:
-        decode_line[7] = obs
-    elif len(obs) == 4:
-        decode_line[4] = obs
-    elif len(obs) == 7:
-        decode_line[8] = obs
 
-segment_map = [''] * 7
-segment_map[0] = in_string_a_but_not_b(decode_line[7], decode_line[1])[0]
+decoded = []
+for line, display in zip(observed_patterns, observed_display):
+    pattern = deepcopy(line)
+    decode_line = {}
+    for obs in line:
+        if is_1478(obs):
+            if len(obs) == 2:
+                one = obs
+                decode_line[obs] = '1'
+            elif len(obs) == 3:
+                seven = obs
+                decode_line[obs] = '7'
+            elif len(obs) == 4:
+                four = obs
+                decode_line[obs] = '4'
+            elif len(obs) == 7:
+                eight = obs
+                decode_line[obs] = '8'
+            pattern.remove(obs)
+
+    zero_six_nine = [d for d in pattern if len(d) == 6]
+    nine = [d for d in zero_six_nine if string1_substringof_string2(four, d)][0]
+    decode_line[nine] = '9'
+    zero_six_nine.remove(nine)
+    zero = [d for d in zero_six_nine if string1_substringof_string2(seven, d)][0]
+    decode_line[zero] = '0'
+    zero_six_nine.remove(zero)
+    six = zero_six_nine[0]
+    decode_line[six] = '6'
+
+    for i in [zero, six, nine]:
+        pattern.remove(i)
+
+    for r in pattern:
+        if string1_substringof_string2(r, six):
+            decode_line[r] = '5'
+        elif string1_substringof_string2(r, nine):
+            decode_line[r] = '3'
+        else:
+            decode_line[r] = '2'
+
+    display_nums = []
+    for value in display:
+        possible_perms = set([''.join(p) for p in permutations(value)])
+        digit = [v for k, v in decode_line.items() if k in possible_perms][0]
+        display_nums.append(digit)
+
+    decoded.append(int(''.join(display_nums)))
+
+print(f"Part 2: Sum of decoded digits is {sum(decoded)}")
