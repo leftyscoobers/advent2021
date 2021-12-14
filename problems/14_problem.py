@@ -15,17 +15,25 @@ def insert_element_in_pair(rule_tuple):
     return ''.join([pair[0], insert_element, pair[1]])
 
 
-def insert_in_polymer(polymer, rule_tuple):
+def insert_in_polymer(polymer, rule_tuple, forbidden_indices):
     replacement = insert_element_in_pair(rule_tuple)
-    return polymer.replace(rule_tuple[0], replacement)
+    first_indices_of_possible_pairs = [i for i in range(0, len(polymer)) if polymer[i:(i+2)] == rule_tuple[0]]
+    insert_indices = [fi + ind + 1 for ind, fi in enumerate(first_indices_of_possible_pairs)] # This is only if you insert all but you won't. fix
+    updated_list = []
+    for i, v in enumerated():
+
+    updated_polymer = [polymer.replace(rule_tuple[0], replacement)] # update this line to avoid forbidden
+    return (insert_indices, updated_polymer)
 
 
 # Next step - update so in each step, no inserted elements are considered for any other rules
 def perform_insertions(polymer, rule_set, n_steps):
     p = polymer
     for s in range(n_steps):
+        indices_of_inserted_letters = []
         for r in rule_set:
-            p = insert_in_polymer(p, r)
+            ind, p = insert_in_polymer(p, r)
+            [indices_of_inserted_letters.append(i) for i in ind]
     return p
 
 
